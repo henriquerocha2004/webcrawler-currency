@@ -2,9 +2,8 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Http;
+use App\Repository\WikipediaRepository;
+use App\Services\CurrencyInformationInput;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
@@ -130,5 +129,196 @@ class CurrencyInformationTest extends TestCase
         ])->get('/api/currency?code=AAA&number=123');
 
         $response->assertStatus(Response::HTTP_BAD_REQUEST);
+    }
+
+    /**
+     * @test
+     */
+    public function should_return_currency_information_using_single_code(): void
+    {
+        $expected = json_decode('
+            [
+                {  
+                  "code": "GBP",  
+                  "number": 826,  
+                  "decimal": 2,  
+                  "currency": "Libra Esterlina",  
+                  "currency_locations": [  
+                    {  
+                      "location": "Reino Unido",  
+                      "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/22px-Flag_of_the_United_Kingdom.svg.png"  
+                    },  
+                    {  
+                      "location": "Ilha de Man",  
+                      "icon": ""  
+                    },  
+                    {  
+                      "location": "Guernesey",  
+                      "icon": ""  
+                    },  
+                    {  
+                      "location": "Jersey",  
+                      "icon": ""  
+                    }  
+                  ]  
+               }
+          ]', true);
+
+        $currencyInformationInput = new CurrencyInformationInput(['GBP'], []);
+        $wikipediaRepository = new WikipediaRepository();
+        $result = $wikipediaRepository->find($currencyInformationInput);
+        $this->assertEquals($expected, $result->data);
+    }
+
+    /**
+     * @test
+     */
+    public function should_return_currency_information_using_single_number(): void
+    {
+        $expected = json_decode('
+            [
+                {  
+                  "code": "GBP",  
+                  "number": 826,  
+                  "decimal": 2,  
+                  "currency": "Libra Esterlina",  
+                  "currency_locations": [  
+                    {  
+                      "location": "Reino Unido",  
+                      "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/22px-Flag_of_the_United_Kingdom.svg.png"  
+                    },  
+                    {  
+                      "location": "Ilha de Man",  
+                      "icon": ""  
+                    },  
+                    {  
+                      "location": "Guernesey",  
+                      "icon": ""  
+                    },  
+                    {  
+                      "location": "Jersey",  
+                      "icon": ""  
+                    }  
+                  ]  
+               }
+          ]', true);
+
+        $currencyInformationInput = new CurrencyInformationInput([], [826]);
+        $wikipediaRepository = new WikipediaRepository();
+        $result = $wikipediaRepository->find($currencyInformationInput);
+        $this->assertEquals($expected, $result->data);
+    }
+
+    /**
+     * @test
+     */
+    public function should_return_currency_information_using_list_code(): void
+    {
+        $expected = json_decode('
+            [
+               {
+                  "code":"GBP",
+                  "number":826,
+                  "decimal":2,
+                  "currency":"Libra Esterlina",
+                  "currency_locations":[
+                     {
+                        "location":"Reino Unido",
+                        "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/22px-Flag_of_the_United_Kingdom.svg.png"
+                     },
+                     {
+                        "location":"Ilha de Man",
+                        "icon":""
+                     },
+                     {
+                        "location":"Guernesey",
+                        "icon":""
+                     },
+                     {
+                        "location":"Jersey",
+                        "icon":""
+                     }
+                  ]
+               },
+               {
+                  "code":"GEL",
+                  "number":981,
+                  "decimal":2,
+                  "currency":"Lari",
+                  "currency_locations":[
+                     {
+                        "location":"Geórgia",
+                        "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Flag_of_Georgia.svg/22px-Flag_of_Georgia.svg.png"
+                     }
+                  ]
+               }
+         ]', true);
+
+        $currencyInformationInput = new CurrencyInformationInput(['GBP', 'GEL'], []);
+        $wikipediaRepository = new WikipediaRepository();
+        $result = $wikipediaRepository->find($currencyInformationInput);
+        $this->assertEquals($expected, $result->data);
+    }
+
+    /**
+     * @test
+     */
+    public function should_return_currency_information_using_list_number()
+    {
+        $expected = json_decode('
+            [
+               {
+                  "code":"GBP",
+                  "number":826,
+                  "decimal":2,
+                  "currency":"Libra Esterlina",
+                  "currency_locations":[
+                     {
+                        "location":"Reino Unido",
+                        "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/22px-Flag_of_the_United_Kingdom.svg.png"
+                     },
+                     {
+                        "location":"Ilha de Man",
+                        "icon":""
+                     },
+                     {
+                        "location":"Guernesey",
+                        "icon":""
+                     },
+                     {
+                        "location":"Jersey",
+                        "icon":""
+                     }
+                  ]
+               },
+               {
+                  "code":"GEL",
+                  "number":981,
+                  "decimal":2,
+                  "currency":"Lari",
+                  "currency_locations":[
+                     {
+                        "location":"Geórgia",
+                        "icon":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Flag_of_Georgia.svg/22px-Flag_of_Georgia.svg.png"
+                     }
+                  ]
+               }
+         ]', true);
+
+        $currencyInformationInput = new CurrencyInformationInput([], [826,981]);
+        $wikipediaRepository = new WikipediaRepository();
+        $result = $wikipediaRepository->find($currencyInformationInput);
+        $this->assertEquals($expected, $result->data);
+    }
+
+    /**
+     * @test
+     */
+    public function should_not_return_currency_information_using_wrong_information(): void
+    {
+        $currencyInformationInput = new CurrencyInformationInput(['AAA'], []);
+        $wikipediaRepository = new WikipediaRepository();
+        $result = $wikipediaRepository->find($currencyInformationInput);
+        $this->assertEquals([], $result->data);
     }
 }

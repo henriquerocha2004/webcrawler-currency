@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repository\WikipediaRepository;
+use App\Services\CurrencyInformationService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +15,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->singleton(CurrencyInformationService::class, function ($app) {
+            return new CurrencyInformationService(
+                $app->make(WikipediaRepository::class)
+            );
+        });
     }
 
     /**
